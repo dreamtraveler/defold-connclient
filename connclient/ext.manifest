@@ -1,0 +1,15 @@
+# C++ symbol in your extension
+name: "connclient"
+platforms:
+    x86-win32:
+        context:
+            flags:  ["-std=c++20"]
+    x86_64-win32:
+        context:
+            flags:  ["-std=c++20"]
+    x86_64-osx:
+        context:
+            flags:  ["-std=c++20"]
+    arm64-osx:
+        context:
+            flags:  ["-std=c++20"]
