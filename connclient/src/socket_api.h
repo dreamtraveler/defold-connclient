@@ -55,7 +55,7 @@ int select_ex(int maxfdp1, fd_set* readset, fd_set* writeset, fd_set* exceptset,
               struct timeval* timeout);
 void set_send_buf(SOCKET s, int len);
 void set_recv_buf(SOCKET s, int len);
-bool set_tcp_no_delay(int fd, bool enable);
+bool set_tcp_no_delay(int fd);
 
 SOCKET InitUDPListenSocket(const char* ip, uint32_t port, bool nonblock = true);
 std::string GetSockAddrStr(const struct sockaddr_in& addr);

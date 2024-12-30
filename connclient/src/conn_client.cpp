@@ -401,7 +401,7 @@ int ConnClientPrivate::CreateConnect(int ai_socktype, int ai_family, int ai_prot
     }
 
     if (ai_socktype == SOCK_STREAM) {
-        if (!SocketAPI::set_tcp_no_delay(sock, true)) {
+        if (!SocketAPI::set_tcp_no_delay(sock)) {
             SocketAPI::closesocket_ex(sock);
             LOG_ERROR("SetTcpNoDelay failed");
             return -1;

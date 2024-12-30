@@ -1,11 +1,11 @@
 #include "socket_api.h"
-#include "common_def.h"
 
 #include <cstdio>
 #include <cstring>
 #include <sstream>
 
 #include "base_macro.h"
+#include "common_def.h"
 #include "file_api.h"
 
 
@@ -275,16 +275,11 @@ uint32_t SocketAPI::availablesocket_ex(SOCKET s)
     return 0;
 }
 
-bool SocketAPI::set_tcp_no_delay(int fd, bool enable)
+bool SocketAPI::set_tcp_no_delay(int fd)
 {
-#ifndef OS_WIN32
-    int val = enable ? 1 : 0;
-    if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(val)) == -1) {
-        return false;
-    }
-#else
-#endif
-    return true;
+    uint32_t tcp_nodelay_enable = 1;
+    return SocketAPI::setsockopt_ex(fd, IPPROTO_TCP, TCP_NODELAY, (void*)&tcp_nodelay_enable,
+                                    sizeof(tcp_nodelay_enable));
 }
 
 bool SocketAPI::shutdown_ex(SOCKET s, int how)
