@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include "common_def.h"
-
 namespace TimeAPI
 {
 int64_t GetTimeMs();

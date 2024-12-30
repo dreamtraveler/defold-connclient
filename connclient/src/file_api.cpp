@@ -59,7 +59,11 @@ long FileAPI::write_ex(int fd, const void* buf, uint32_t len)
 
 void FileAPI::close_ex(int fd)
 {
+#ifndef OS_WIN32
     close(fd);
+#else
+    _close(fd);
+#endif
 }
 
 int FileAPI::fcntl_ex(int fd, int cmd)

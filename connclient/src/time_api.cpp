@@ -1,4 +1,5 @@
 #include "time_api.h"
+#include "base_macro.h"
 
 #include <iomanip>
 #include <sstream>

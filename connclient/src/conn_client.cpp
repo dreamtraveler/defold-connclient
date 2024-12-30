@@ -1,22 +1,27 @@
 #include "conn_client.h"
+#include "base_macro.h"
+#include "common_def.h"
 
+#ifndef OS_WIN32
 #include <sys/select.h>
+#include "unistd.h"
+#else
+#include <WinSock2.h>
+#endif
 
 #include <cstdint>
 #include <functional>
 #include <thread>
 
-#include "base_macro.h"
+
 #include "concurrentqueue.h"
 #include "conn_protocol.h"
 #include "kcp_session.h"
-#include "net.h"
 #include "socket_api.h"
 #include "stream.h"
 #include "sys_api.h"
 #include "time_api.h"
 #include "time_expire.h"
-#include "unistd.h"
 
 
 const int recv_one_time_size = 1024 * 16;
@@ -192,8 +197,8 @@ ConnClientPrivate::ConnClientPrivate()
 {
 #ifndef OS_WIN32
     pipe(pipe_sock_);
-    net::SetNonBlock(pipe_sock_[0]);
-    net::SetNonBlock(pipe_sock_[1]);
+    SocketAPI::setsocketnonblocking_ex(pipe_sock_[0], true);
+    SocketAPI::setsocketnonblocking_ex(pipe_sock_[1], true);
 #endif
     thread_priority_ = SysAPI::GetPriority();
     SetConnState(CS_INIT);
@@ -208,8 +213,8 @@ ConnClientPrivate::~ConnClientPrivate()
     if (thread_.joinable()) thread_.join();
     InnerClose(-1);
 #ifndef OS_WIN32
-    if (pipe_sock_[0] != -1) close(pipe_sock_[0]);
-    if (pipe_sock_[1] != -1) close(pipe_sock_[1]);
+    if (pipe_sock_[0] != -1) SocketAPI::closesocket_ex(pipe_sock_[0]);
+    if (pipe_sock_[1] != -1) SocketAPI::closesocket_ex(pipe_sock_[1]);
     pipe_sock_[0] = -1;
     pipe_sock_[1] = -1;
 #endif
@@ -378,7 +383,7 @@ int ConnClientPrivate::CreateConnect(int ai_socktype, int ai_family, int ai_prot
         return -1;
     }
     if (!SocketAPI::setsocketnonblocking_ex(sock, true)) {
-        close(sock);
+        SocketAPI::closesocket_ex(sock);
         LOG_ERROR("setsocketnonblocking_ex failed");
         return -1;
     }
@@ -388,15 +393,15 @@ int ConnClientPrivate::CreateConnect(int ai_socktype, int ai_family, int ai_prot
         if (errno == EINPROGRESS) {
             LOG_DEBUG("It is Ok in EINPROGRESS.");
         } else {
-            close(sock);
+            SocketAPI::closesocket_ex(sock);
             LOG_ERROR("connect failed err: " << strerror(errno));
             return -1;
         }
     }
 
     if (ai_socktype == SOCK_STREAM) {
-        if (net::SetTcpNoDelay(sock, true)) {
-            close(sock);
+        if (!SocketAPI::set_tcp_no_delay(sock, true)) {
+            SocketAPI::closesocket_ex(sock);
             LOG_ERROR("SetTcpNoDelay failed");
             return -1;
         }
@@ -622,7 +627,7 @@ void ConnClientPrivate::Output(const char* data, int len, int64_t cur_time)
 {
     if (output_cb_ != nullptr) {
         std::string data_str(data, len);
-        out_queue_.enqueue([this, data_str = std::move(data_str), cur_time]() {
+        out_queue_.enqueue([this, data_str = std::move(data_str)]() {
             if (output_cb_ != nullptr) {
                 CallLuaCallback(user_data_, output_cb_, data_str.c_str(), data_str.size(), nullptr,
                                 0);

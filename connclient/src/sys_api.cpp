@@ -1,6 +1,9 @@
 #include "sys_api.h"
+#include "base_macro.h"
 
+#ifndef OS_WIN32
 #include <sys/resource.h>
+#endif
 
 #include "common_def.h"
 

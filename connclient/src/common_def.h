@@ -8,7 +8,6 @@
 
 #include "time_api.h"
 
-#define INVALID_SOCKET -1
 
 #if ((defined __APPLE__) && (defined __MACH__))
 #if (defined(iOS))
@@ -30,4 +29,9 @@
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #else
 #define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+#endif
+
+#ifndef OS_WIN32
+#define INVALID_SOCKET -1
+#define SOCKET_ERROR -1
 #endif

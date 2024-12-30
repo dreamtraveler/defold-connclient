@@ -1,4 +1,5 @@
 #include "socket_api.h"
+#include "common_def.h"
 
 #include <cstdio>
 #include <cstring>
@@ -272,6 +273,18 @@ uint32_t SocketAPI::availablesocket_ex(SOCKET s)
     return argp;
 #endif
     return 0;
+}
+
+bool SocketAPI::set_tcp_no_delay(int fd, bool enable)
+{
+#ifndef OS_WIN32
+    int val = enable ? 1 : 0;
+    if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(val)) == -1) {
+        return false;
+    }
+#else
+#endif
+    return true;
 }
 
 bool SocketAPI::shutdown_ex(SOCKET s, int how)
