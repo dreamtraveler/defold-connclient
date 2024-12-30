@@ -1,9 +1,11 @@
 #include "conn_client.h"
+
 #include "base_macro.h"
 #include "common_def.h"
 
 #ifndef OS_WIN32
 #include <sys/select.h>
+
 #include "unistd.h"
 #else
 #include <WinSock2.h>
@@ -12,7 +14,6 @@
 #include <cstdint>
 #include <functional>
 #include <thread>
-
 
 #include "concurrentqueue.h"
 #include "conn_protocol.h"
@@ -562,8 +563,8 @@ void ConnClientPrivate::NotifyWorker()
 #endif
 }
 
-void CallLuaCallback(void* user, LuaCallback callback, const char* data, int data_len,
-                     const char* text, int text_len)
+void ConnClientPrivate::CallLuaCallback(void* user, LuaCallback callback, const char* data,
+                                        int data_len, const char* text, int text_len)
 {
     if (!dmScript::IsCallbackValid(callback)) return;
 

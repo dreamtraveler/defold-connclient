@@ -263,7 +263,6 @@ static dmExtension::Result FinalizeMyExtension(dmExtension::Params* params)
 
 static dmExtension::Result OnUpdateMyExtension(dmExtension::Params* params)
 {
-    dmLogInfo("OnUpdateMyExtension");
     for (int i = 0; i < g_connclients.size(); ++i) {
         g_connclients[i]->Update();
     }
@@ -298,6 +297,6 @@ static void OnEventMyExtension(dmExtension::Params* params, const dmExtension::E
 
 // MyExtension is the C++ symbol that holds all relevant extension data.
 // It must match the name field in the `ext.manifest`
-DM_DECLARE_EXTENSION(MyExtension, LIB_NAME, AppInitializeMyExtension, AppFinalizeMyExtension,
+DM_DECLARE_EXTENSION(connclient, LIB_NAME, AppInitializeMyExtension, AppFinalizeMyExtension,
                      InitializeMyExtension, OnUpdateMyExtension, OnEventMyExtension,
                      FinalizeMyExtension)
