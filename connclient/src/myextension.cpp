@@ -36,20 +36,14 @@ static void RemoveConnection(ConnClient* conn)
     }
 }
 
-static int lua_connclient_connect(lua_State* L)
+static int lua_connclient_create(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 1);
 
-    const char* ip = luaL_checkstring(L, 1);
-    int port = luaL_checkinteger(L, 2);
-    int timeout_ms = luaL_checkinteger(L, 3);
+    int magic = luaL_checkinteger(L, 1);
 
     ConnClient* conn = new ConnClient();
-    int ret = conn->Connect(ip, port, timeout_ms);
-    if (ret != 0) {
-        delete conn;
-        return luaL_error(L, "client->Connect failed");
-    }
+    conn->SetMagicNum(magic);
 
     g_connclients.push_back(conn);
     lua_pushlightuserdata(L, conn);
@@ -69,6 +63,24 @@ static ConnClient* pop_conn_client(lua_State* L)
         luaL_error(L, "Invalid connection");
         return nullptr;
     }
+}
+
+static int lua_connclient_connect(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+
+    ConnClient* conn = pop_conn_client(L);
+    if (conn != nullptr) {
+        const char* ip = luaL_checkstring(L, 2);
+        int port = luaL_checkinteger(L, 3);
+        int timeout_ms = luaL_checkinteger(L, 4);
+        int ret = conn->Connect(ip, port, timeout_ms);
+        if (ret != 0) {
+            delete conn;
+            return luaL_error(L, "client->Connect failed");
+        }
+    }
+    return 0;
 }
 
 static int lua_connclient_close(lua_State* L)
@@ -209,6 +221,7 @@ static int lua_connclient_set_relink_cb(lua_State* L)
 }
 
 static const luaL_reg connclient_module_methods[] = {
+    {"create", lua_connclient_create},
     {"connect", lua_connclient_connect},
     {"close", lua_connclient_close},
     {"send", lua_connclient_send},

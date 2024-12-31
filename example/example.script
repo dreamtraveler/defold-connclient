@@ -1,6 +1,8 @@
+local connclient = _G["connclient"]
+
 function init(self)
-	local client = connclient.connect("10.1.8.148", "10101", 5000)
-	connclient.set_magic_num(client, 117);
+	local client = connclient.create(117)
+	connclient.connect(client, "127.0.0.1", 10101, 5000)
 end
 
 function final(self)
