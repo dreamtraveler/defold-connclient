@@ -278,8 +278,7 @@ uint32_t SocketAPI::availablesocket_ex(SOCKET s)
 bool SocketAPI::set_tcp_no_delay(int fd)
 {
     uint32_t tcp_nodelay_enable = 1;
-    return SocketAPI::setsockopt_ex(fd, IPPROTO_TCP, TCP_NODELAY, (void*)&tcp_nodelay_enable,
-                                    sizeof(tcp_nodelay_enable));
+    return setsockopt_ex(fd, IPPROTO_TCP, TCP_NODELAY, (void*)&tcp_nodelay_enable, sizeof(tcp_nodelay_enable));
 }
 
 bool SocketAPI::shutdown_ex(SOCKET s, int how)

@@ -1,5 +1,6 @@
 function init(self)
-	connclient.connect("127.0.0.1", "80", 5000)
+	local client = connclient.connect("10.1.8.148", "10101", 5000)
+	connclient.set_magic_num(client, 117);
 end
 
 function final(self)

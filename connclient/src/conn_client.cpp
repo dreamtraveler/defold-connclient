@@ -288,6 +288,10 @@ void ConnClientPrivate::NetThreadLoop()
                     tcp_writable_ = false;
                     if (conn_state_ == CS_CONNECTING) {
                         SetConnState(CS_CONNECTED);
+                        if (!SocketAPI::set_tcp_no_delay(tcp_sock_)) {
+                            const int err = SocketAPI::get_last_error();
+                            LOG_ERROR("SetTcpNoDelay failed errno["<<err<<"] errstr[" << strerror(err) << "]");
+                        }
                         LOG_INFO("tcp_sock connect Ok");
                     } else {
                         OnTcpWrite();
@@ -400,13 +404,6 @@ int ConnClientPrivate::CreateConnect(int ai_socktype, int ai_family, int ai_prot
         }
     }
 
-    if (ai_socktype == SOCK_STREAM) {
-        if (!SocketAPI::set_tcp_no_delay(sock)) {
-            SocketAPI::closesocket_ex(sock);
-            LOG_ERROR("SetTcpNoDelay failed");
-            return -1;
-        }
-    }
 
 #ifndef OS_WIN32
     // TOS
@@ -648,7 +645,7 @@ void ConnClientPrivate::OnTcpRead(int64_t cur_time)
         read_stream_.AddSize(nread);
         ReadStream(cur_time);
     } else {
-        LOG_ERROR("close tcp_sock " << tcp_sock_ << " :" << strerror(errno));
+        LOG_ERROR("close tcp_sock nread["<<nread<<"] " << tcp_sock_ << " :" << strerror(errno));
         InnerClose(CLIENT_CONNECT_ERROR);
     }
 }
