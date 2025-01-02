@@ -2,6 +2,37 @@ local connclient = _G["connclient"]
 
 function init(self)
 	local client = connclient.create(117)
+	connclient.add_relink_interval(client, 100)
+	connclient.add_relink_interval(client, 200)
+	connclient.add_relink_interval(client, 300)
+	connclient.set_logdebug_cb(client, function(s, cli, text)
+		print("logdebug:", text)
+	end)
+	connclient.set_loginfo_cb(client, function(s, cli, text)
+		print("loginfo:", text)
+	end)
+	connclient.set_logerror_cb(client, function(s, cli, text)
+		print("logerror:", text)
+	end)
+	connclient.set_relinksuccess_cb(client, function (s, cli)
+		print("relinksuccess")
+	end)
+	connclient.set_disconnect_cb(client, function (s, cli, reason)
+		print("disconnect:", reason)
+	end)
+	connclient.set_relink_cb(client, function (s, cli, count)
+		print("relinking count:", count)
+	end)
+
+	connclient.set_connectsuccess_cb(client, function(s, cli)
+		print("connectsuccess")
+		connclient.send(client, "hello")
+	end)
+
+	connclient.set_output_cb(client, function (s, cli, msg)
+		print("output_cb:", msg)
+	end)
+
 	connclient.connect(client, "127.0.0.1", 10101, 5000)
 end
 

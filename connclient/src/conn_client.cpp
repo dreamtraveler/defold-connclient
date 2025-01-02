@@ -290,7 +290,8 @@ void ConnClientPrivate::NetThreadLoop()
                         SetConnState(CS_CONNECTED);
                         if (!SocketAPI::set_tcp_no_delay(tcp_sock_)) {
                             const int err = SocketAPI::get_last_error();
-                            LOG_ERROR("SetTcpNoDelay failed errno["<<err<<"] errstr[" << strerror(err) << "]");
+                            LOG_ERROR("SetTcpNoDelay failed errno[" << err << "] errstr["
+                                                                    << strerror(err) << "]");
                         }
                         LOG_INFO("tcp_sock connect Ok");
                     } else {
@@ -441,6 +442,9 @@ void ConnClientPrivate::Close()
 }
 void ConnClientPrivate::InnerClose(int reason)
 {
+    if (relink_count_ >= (int)relink_interval_ms_vec_.size()) {
+        reason = CLIENT_CONNECT_TIMEOUT;
+    }
     if (reason < CLIENT_CONNECT_ERROR) {
         LOG_DEBUG("Release Kcp");
         kcp_session_.Flush();
@@ -586,7 +590,7 @@ void ConnClientPrivate::CallLuaCallback(void* user, LuaCallback callback, const 
         nargs++;
     }
 
-    dmScript::PCall(L, nargs, 0);
+    dmScript::PCall(L, nargs + 1, 0);
     dmScript::TeardownCallback(callback);
 }
 
@@ -645,7 +649,7 @@ void ConnClientPrivate::OnTcpRead(int64_t cur_time)
         read_stream_.AddSize(nread);
         ReadStream(cur_time);
     } else {
-        LOG_ERROR("close tcp_sock nread["<<nread<<"] " << tcp_sock_ << " :" << strerror(errno));
+        LOG_ERROR("close tcp_sock nread[" << nread << "] " << tcp_sock_ << " :" << strerror(errno));
         InnerClose(CLIENT_CONNECT_ERROR);
     }
 }
