@@ -466,7 +466,7 @@ void ConnClientPrivate::InnerClose(int reason)
     if (reason >= 0 && disconnect_cb_ != nullptr) {
         if (disconnect_cb_) {
             out_queue_.enqueue([this, reason]() {
-                CallLuaCallback(user_data_, disconnect_cb_, nullptr, 0, nullptr, reason);
+                CallLuaCallback(user_data_, disconnect_cb_, nullptr, 0, nullptr, reason + 1);
             });
         }
     }
@@ -586,7 +586,7 @@ void ConnClientPrivate::CallLuaCallback(void* user, LuaCallback callback, const 
         lua_pushlstring(L, text, text_len);
         nargs++;
     } else if (text_len > 0) {
-        lua_pushnumber(L, text_len);
+        lua_pushnumber(L, text_len - 1);
         nargs++;
     }
 
