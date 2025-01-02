@@ -639,7 +639,7 @@ void ConnClientPrivate::OnTcpRead(int64_t cur_time)
     if (read_stream_.EnsureWritable(recv_one_time_size) != 0) {
         InnerClose(CLIENT_CONNECT_ERROR);
     }
-    int nread = (int)recv(tcp_sock_, read_stream_.End(), recv_one_time_size, 0);
+    int nread = SocketAPI::recv_ex(tcp_sock_, read_stream_.End(), recv_one_time_size, 0);
     if (nread > 0) {
         LOG_DEBUG("recv nread=" << nread);
         read_stream_.AddSize(nread);
@@ -785,7 +785,7 @@ void ConnClientPrivate::OnTcpWrite()
 {
     if (write_stream_.Len() <= 0) return;
     const int need_send_len = write_stream_.Len();
-    const int nwritten = (int)send(tcp_sock_, write_stream_.Buf(), write_stream_.Len(), 0);
+    const int nwritten = SocketAPI::send_ex(tcp_sock_, write_stream_.Buf(), write_stream_.Len(), 0);
     if (nwritten > 0) {
         write_stream_.Skip(nwritten);
     } else {
@@ -817,6 +817,7 @@ void ConnClientPrivate::SendTcpPing(int64_t now_ms, bool immediate)
 
 void ConnClientPrivate::SendUdpPing(int64_t now_ms)
 {
+    if (udp_sock_ == INVALID_SOCKET) return;
     if (conn_state_ >= CS_CONNECTED && udp_ping_expire_.TryExpire(now_ms)) {
         const size_t len = sizeof(int) + sizeof(int64_t);
         char buf[len];
